@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>切图工作台 · 星露谷素材适配</title>
+    <style>
+      :root {
+        --bg: #101614;
+        --panel: #16211d;
+        --line: #2a3a33;
+        --text: #d8e6d6;
+        --dim: #7d9480;
+        --accent: #7fc46a;
+        --warn: #e0b23a;
+        --bad: #d9534f;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.5 system-ui, "Microsoft YaHei", sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line);
+      }
+      header h1 { font-size: 14px; font-weight: 500; margin: 0 8px 0 0; }
+      button, select, input[type="file"]::file-selector-button {
+        background: #23342c; color: var(--text); border: 1px solid var(--line);
+        border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer;
+      }
+      button:hover { border-color: var(--accent); }
+      button.primary { background: #2f4a2a; border-color: #4c6b3f; }
+      button.danger { border-color: #6b3a3a; }
+      label { color: var(--dim); display: inline-flex; align-items: center; gap: 5px; }
+      input[type="number"] {
+        width: 58px; background: #0d1412; color: var(--text);
+        border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; font: inherit;
+      }
+
+      main { flex: 1; display: flex; min-height: 0; }
+
+      #keys {
+        width: 290px; overflow: auto; border-right: 1px solid var(--line);
+        background: var(--panel); flex-shrink: 0;
+      }
+      .group { padding: 8px 12px 4px; color: var(--dim); font-size: 11px; letter-spacing: .5px; }
+      .k {
+        display: flex; align-items: center; gap: 8px;
+        padding: 4px 12px; cursor: pointer; border-left: 3px solid transparent;
+      }
+      .k:hover { background: #1c2a24; }
+      .k.active { background: #23342c; border-left-color: var(--accent); }
+      .k .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .k .size { color: var(--dim); font-size: 11px; }
+      .k .dot { width: 7px; height: 7px; border-radius: 50%; background: #3a4a42; flex-shrink: 0; }
+      .k.done .dot { background: var(--accent); }
+      .k .thumb {
+        width: 20px; height: 20px; image-rendering: pixelated; flex-shrink: 0;
+        background: #0a100e; border-radius: 3px;
+      }
+
+      #stage { flex: 1; overflow: auto; padding: 14px; min-width: 0; }
+      #wrap { position: relative; display: inline-block; }
+      #sheet { image-rendering: pixelated; cursor: crosshair; display: block; }
+      #overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
+
+      #side {
+        width: 230px; border-left: 1px solid var(--line); background: var(--panel);
+        padding: 12px; overflow: auto; flex-shrink: 0;
+      }
+      #side h2 { font-size: 12px; color: var(--dim); font-weight: 400; margin: 0 0 6px; }
+      #preview {
+        width: 100%; height: 130px; background: #0a100e; border-radius: 8px;
+        image-rendering: pixelated; display: block; margin-bottom: 12px;
+        background-image: linear-gradient(45deg, #131d19 25%, transparent 25%, transparent 75%, #131d13 75%),
+          linear-gradient(45deg, #131d19 25%, transparent 25%, transparent 75%, #131d19 75%);
+        background-size: 12px 12px; background-position: 0 0, 6px 6px;
+      }
+      #info { font-size: 12px; color: var(--dim); line-height: 1.7; }
+      #info b { color: var(--text); font-weight: 500; }
+      #hint { margin-top: 12px; font-size: 11px; color: var(--dim); line-height: 1.7; }
+      .row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+      #status { margin-left: auto; color: var(--dim); font-size: 12px; }
+
+      /* 报错浮层：工作台出问题时要能看见原因，而不是一片空白 */
+      #fatal {
+        display: none;
+        padding: 14px 18px;
+        background: #3a1414;
+        border-bottom: 1px solid #7a2a2a;
+        color: #ffd7d7;
+        font: 12px/1.7 Consolas, "Courier New", monospace;
+        white-space: pre-wrap;
+        cursor: pointer;
+      }
+      #fatal b { display: block; margin-bottom: 6px; color: #ff8f8f; font-size: 13px; }
+
+      /* 没有载入图源时的提示 */
+      #empty {
+        color: var(--dim);
+        font-size: 13px;
+        line-height: 1.9;
+        padding: 24px;
+        max-width: 460px;
+      }
+      #empty b { color: var(--text); }
+
+      /* 使用指南 */
+      #guide {
+        background: #131d19; border-bottom: 1px solid var(--line);
+        font-size: 12px; line-height: 1.75;
+      }
+      #guide summary {
+        padding: 8px 14px; cursor: pointer; color: var(--accent); user-select: none;
+      }
+      #guide summary:hover { background: #182420; }
+      #guide .body { padding: 4px 18px 16px 34px; color: var(--dim); }
+      #guide .body b { color: var(--text); font-weight: 500; }
+      #guide code {
+        background: #0a100e; padding: 1px 5px; border-radius: 3px;
+        color: #b6dd97; font-size: 11px;
+      }
+      #guide ol { margin: 6px 0; padding-left: 18px; }
+      #guide li { margin-bottom: 6px; }
+      #guide .warn { color: var(--warn); }
+    </style>
+  </head>
+  <body>
+    <div id="fatal" title="点击收起"></div>
+
+    <script>
+      // 任何脚本错误都显示出来 —— 否则工作台挂了就是一片空白，只能靠猜
+      (function () {
+        var box = document.getElementById('fatal');
+        window.__bakerFatal = function (title, detail) {
+          if (!box) return;
+          box.style.display = 'block';
+          box.innerHTML = '';
+          var b = document.createElement('b');
+          b.textContent = title;
+          var s = document.createElement('span');
+          s.textContent = detail;
+          box.appendChild(b);
+          box.appendChild(s);
+        };
+        box.addEventListener('click', function () { box.style.display = 'none'; });
+        window.addEventListener('error', function (e) {
+          window.__bakerFatal(
+            '脚本出错',
+            (e.message || '') + '\n' + (e.filename || '') + ':' + (e.lineno || '') +
+            (e.error && e.error.stack ? '\n\n' + e.error.stack : '')
+          );
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          window.__bakerFatal('未处理的异常', String((r && r.stack) || r));
+        });
+      })();
+    </script>
+    <header>
+      <h1>切图工作台</h1>
+      <label>
+        载入图源
+        <input type="file" id="files" accept="image/*" multiple />
+      </label>
+      <label>图源 <select id="source"></select></label>
+      <label><input type="checkbox" id="snap" checked /> 吸附到网格</label>
+      <label>网格 <input type="number" id="grid" value="16" min="1" max="64" /></label>
+      <label>缩放 <input type="number" id="zoom" value="3" min="1" max="12" /></label>
+      <button id="clear">清空当前 key</button>
+      <button id="export" class="primary">导出 pack.map.json</button>
+      <span id="status"></span>
+    </header>
+
+    <details id="guide">
+      <summary>怎么用 —— 首次使用看这里（点开）</summary>
+      <div class="body">
+        <ol>
+          <li>
+            <b>解包游戏素材。</b>用 <b>StardewXnbHack</b>（Pathoschild 的开源工具，GitHub 上搜这个名字）。
+            放到星露谷游戏目录里运行，它会把 <code>Content</code> 里的 <code>.xnb</code> 全部解成 PNG，
+            输出在 <code>Content (unpacked)/</code>。
+          </li>
+          <li>
+            <b>挑出要用的图。</b>常用这几个：
+            <ul style="margin:4px 0;padding-left:18px">
+              <li><code>Maps/spring_outdoorsTileSheet.png</code> —— 户外地形（草地 / 泥土 / 水 / 路 / 树 / 围栏）</li>
+              <li><code>TileSheets/crops.png</code> —— 作物生长阶段（所有作物挤在一张大图上）</li>
+              <li><code>Characters/&lt;某个角色&gt;.png</code> —— 角色 4 方向行走图（一帧 16×32）</li>
+              <li><code>LooseSprites/Cursors.png</code> —— 杂物大杂烩（工具、UI、物品图标都在里面）</li>
+              <li><code>Buildings/ShippingBin.png</code>、<code>Buildings/houses.png</code> —— 出货箱 / 房子</li>
+            </ul>
+          </li>
+          <li><b>把它们放进</b> <code>farm-game/public/assets/</code>（文件名保持原样）。</li>
+          <li><b>在这里载入它们</b>（左上角"载入图源"，可以多选）。</li>
+          <li><b>逐个 key 拖框圈区域。</b>左边清单 28 个 key，圈完的会变绿点并显示缩略图。</li>
+          <li><b>导出</b> <code>pack.map.json</code>，覆盖到 <code>farm-game/src/data/pack.map.json</code>。</li>
+          <li>把 <code>farm-game/src/config.js</code> 里的 <code>USE_PACK_TEXTURES</code> 改成 <code>true</code>。</li>
+          <li>跑 <code>npm test</code> —— 会告诉你还缺哪个 key、哪个尺寸不对。</li>
+        </ol>
+        <b>三个容易踩的点：</b>
+        <ul style="margin:4px 0;padding-left:18px">
+          <li>角色帧源图是 <b>16×32</b>，我们的角色是 <b>16×24</b> —— 在右侧"输出宽高"填 <code>16</code> / <code>24</code> 压扁。</li>
+          <li><code>tiles</code> 是图集：<b>每拖一次追加一格</b>，需要 5 格（草地 / 深草 / 泥土 / 水 / 碎石），顺序别搞错。</li>
+          <li>作物成熟图 <code>crop-mature-*</code> 是最费时的一块（每种作物一张），可以最后再补。</li>
+        </ul>
+        <span class="warn">
+          素材只放在本地自用，别提交到任何公开仓库、别分享给任何人 —— 那是受版权保护的资源。
+        </span>
+      </div>
+    </details>
+
+    <main>
+      <div id="keys"></div>
+      <div id="stage">
+        <div id="wrap">
+          <canvas id="sheet"></canvas>
+          <canvas id="overlay"></canvas>
+        </div>
+      </div>
+      <div id="side">
+        <h2>当前 key</h2>
+        <canvas id="preview" width="200" height="130"></canvas>
+        <div id="info"></div>
+        <div class="row">
+          <label>输出宽 <input type="number" id="outw" placeholder="同框" /></label>
+          <label>高 <input type="number" id="outh" placeholder="同框" /></label>
+        </div>
+        <div id="hint">
+          在图源上按住鼠标拖拽，框出当前 key 的区域。<br />
+          <b>tiles</b> 这种图集：每拖一次追加一格，需要 5 格。<br />
+          玩家贴图源是 16x32 的话，在"输出宽高"填 16 / 24 压扁。
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      // 清单由 scripts/check-assets.mjs 生成（跑 npm test 就会更新）。
+      //
+      // ★ 用相对路径，并且多试几个 —— 预览面板可能是通过它自己的静态服务代理的，
+      //   写死的绝对路径 /pack.keys.json 会指到别的根目录去，结果就是"什么都看不到"。
+      async function loadKeys() {
+        const tried = [];
+        for (const url of ['pack.keys.json', './pack.keys.json', '/pack.keys.json']) {
+          try {
+            const r = await fetch(url, { cache: 'no-store' });
+            if (!r.ok) { tried.push(`${url} → HTTP ${r.status}`); continue; }
+            const j = await r.json();
+            if (j && Array.isArray(j.keys) && j.keys.length) return j.keys;
+            tried.push(`${url} → 内容不是预期的 { keys: [...] }`);
+          } catch (e) {
+            tried.push(`${url} → ${e.message}`);
+          }
+        }
+        window.__bakerFatal(
+          '读不到贴图清单（pack.keys.json）',
+          '试过这几个路径，都失败了：\n  ' + tried.join('\n  ') +
+            '\n\n解决办法：在 farm-game 目录下跑一次 `npm test`，它会生成 public/pack.keys.json。'
+        );
+        return null;
+      }
+
+      const keys = await loadKeys();
+      if (!keys) throw new Error('读不到 pack.keys.json');
+
+      // ---------- 状态 ----------
+      const sources = new Map(); // id -> { file, path, img, w, h }
+      const cuts = {}; // key -> { source, rect:[x,y,w,h], out?:[w,h] }
+      const sheets = {}; // key -> { source, cells:[[x,y,w,h],...] }
+      let activeKey = keys[0].key;
+
+      const $ = (id) => document.getElementById(id);
+      const sheetCv = $('sheet');
+      const sheetCtx = sheetCv.getContext('2d');
+      const ovCv = $('overlay');
+      const ovCtx = ovCv.getContext('2d');
+      const preview = $('preview');
+      const pctx = preview.getContext('2d');
+
+      const activeEntry = () => keys.find((k) => k.key === activeKey);
+      const isSheetKey = () => activeEntry().kind === 'tileset';
+      const zoom = () => Number($('zoom').value) || 1;
+      const gridSize = () => Number($('grid').value) || 16;
+      const curSource = () => sources.get($('source').value);
+
+      // ---------- 载入图源 ----------
+      $('files').addEventListener('change', async (e) => {
+        for (const file of e.target.files) {
+          const id = file.name.replace(/\.[^.]+$/, '');
+          const url = URL.createObjectURL(file);
+          const img = await loadImage(url);
+          sources.set(id, { file, path: `assets/${file.name}`, img, w: img.naturalWidth, h: img.naturalHeight });
+        }
+        renderSourceSelect();
+        draw();
+        status(`已载入 ${sources.size} 个图源`);
+      });
+
+      function loadImage(src) {
+        return new Promise((res, rej) => {
+          const i = new Image();
+          i.onload = () => res(i);
+          i.onerror = rej;
+          i.src = src;
+        });
+      }
+
+      function renderSourceSelect() {
+        const sel = $('source');
+        const prev = sel.value;
+        sel.innerHTML = '';
+        for (const [id, s] of sources) {
+          const o = document.createElement('option');
+          o.value = id;
+          o.textContent = `${id} (${s.w}x${s.h})`;
+          sel.appendChild(o);
+        }
+        if (sources.has(prev)) sel.value = prev;
+      }
+
+      $('source').addEventListener('change', () => { draw(); renderSide(); });
+
+      // ---------- 拖框选区域 ----------
+      let drag = null;
+
+      const toSource = (e) => {
+        const r = sheetCv.getBoundingClientRect();
+        let x = (e.clientX - r.left) / zoom();
+        let y = (e.clientY - r.top) / zoom();
+        if ($('snap').checked) {
+          const g = gridSize();
+          x = Math.round(x / g) * g;
+          y = Math.round(y / g) * g;
+        }
+        return [Math.max(0, Math.floor(x)), Math.max(0, Math.floor(y))];
+      };
+
+      sheetCv.addEventListener('mousedown', (e) => {
+        if (!curSource()) return;
+        const [x, y] = toSource(e);
+        drag = { x0: x, y0: y, x1: x, y1: y };
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!drag) return;
+        const [x, y] = toSource(e);
+        drag.x1 = x;
+        drag.y1 = y;
+        draw();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!drag) return;
+        const src = curSource();
+        const x = Math.min(drag.x0, drag.x1);
+        const y = Math.min(drag.y0, drag.y1);
+        let w = Math.abs(drag.x1 - drag.x0);
+        let h = Math.abs(drag.y1 - drag.y0);
+        drag = null;
+
+        if (!src || w <= 0 || h <= 0) return draw();
+
+        w = Math.min(w, src.w - x);
+        h = Math.min(h, src.h - y);
+        const rect = [x, y, w, h];
+
+        if (isSheetKey()) {
+          const cur = sheets[activeKey] || { source: $('source').value, cells: [] };
+          cur.source = $('source').value;
+          cur.cells.push(rect);
+          sheets[activeKey] = cur;
+          delete cuts[activeKey];
+        } else {
+          const prev = cuts[activeKey];
+          const entry = { source: $('source').value, rect };
+          if (prev && prev.out) entry.out = prev.out;
+          cuts[activeKey] = entry;
+          delete sheets[activeKey];
+        }
+        renderKeys();
+        renderSide();
+        draw();
+      });
+
+      // ---------- 输出尺寸 ----------
+      for (const id of ['outw', 'outh']) {
+        $(id).addEventListener('input', () => {
+          const w = Number($('outw').value);
+          const h = Number($('outh').value);
+          const c = cuts[activeKey];
+          if (!c) return;
+          if (w > 0 && h > 0) c.out = [w, h];
+          else delete c.out;
+          renderKeys();
+          renderSide();
+        });
+      }
+
+      $('clear').addEventListener('click', () => {
+        delete cuts[activeKey];
+        delete sheets[activeKey];
+        renderKeys();
+        renderSide();
+        draw();
+      });
+
+      // ---------- 绘制 ----------
+      function draw() {
+        const src = curSource();
+        const emptyW = 620;
+        const emptyH = 180;
+        ovCv.width = sheetCv.width = src ? src.w * zoom() : emptyW;
+        ovCv.height = sheetCv.height = src ? src.h * zoom() : emptyH;
+
+        sheetCtx.imageSmoothingEnabled = false;
+        sheetCtx.clearRect(0, 0, sheetCv.width, sheetCv.height);
+
+        if (!src) {
+          // 没有图源时给一段明确的指引，而不是一块黑方块让人以为坏了
+          sheetCtx.fillStyle = '#1a2420';
+          sheetCtx.fillRect(0, 0, emptyW, emptyH);
+          sheetCtx.fillStyle = '#9db894';
+          sheetCtx.font = '15px system-ui, "Microsoft YaHei", sans-serif';
+          sheetCtx.fillText('还没有载入图源', 24, 52);
+          sheetCtx.fillStyle = '#7d9480';
+          sheetCtx.font = '13px system-ui, "Microsoft YaHei", sans-serif';
+          sheetCtx.fillText('1. 点左上角的「载入图源」', 24, 92);
+          sheetCtx.fillText('2. 选 farm-game/public/assets/ 里的 PNG（可多选）', 24, 118);
+          sheetCtx.fillText('3. 在左边清单里点一个 key，然后在图上拖框圈出它的区域', 24, 144);
+          return;
+        }
+
+        sheetCtx.drawImage(src.img, 0, 0, src.w, src.h, 0, 0, sheetCv.width, sheetCv.height);
+
+        // 网格
+        const z = zoom();
+        const g = gridSize();
+        ovCtx.clearRect(0, 0, ovCv.width, ovCv.height);
+        ovCtx.lineWidth = 1;
+        ovCtx.strokeStyle = 'rgba(127,196,106,0.18)';
+        ovCtx.beginPath();
+        for (let x = 0; x <= src.w; x += g) { ovCtx.moveTo(x * z + 0.5, 0); ovCtx.lineTo(x * z + 0.5, ovCv.height); }
+        for (let y = 0; y <= src.h; y += g) { ovCtx.moveTo(0, y * z + 0.5); ovCtx.lineTo(ovCv.width, y * z + 0.5); }
+        ovCtx.stroke();
+
+        // 已分配的框（当前图源上的）
+        const sid = $('source').value;
+        for (const k of keys) {
+          const c = cuts[k.key];
+          if (c && c.source === sid) box(c.rect, k.key === activeKey);
+          const s = sheets[k.key];
+          if (s && s.source === sid) for (const cell of s.cells) box(cell, k.key === activeKey);
+        }
+
+        // 正在拖的框
+        if (drag) {
+          const x = Math.min(drag.x0, drag.x1);
+          const y = Math.min(drag.y0, drag.y1);
+          box([x, y, Math.abs(drag.x1 - drag.x0), Math.abs(drag.y1 - drag.y0)], true, '#ffe66b');
+        }
+      }
+
+      function box([x, y, w, h], active, color) {
+        const z = zoom();
+        ovCtx.lineWidth = active ? 2 : 1;
+        ovCtx.strokeStyle = color || (active ? '#7fc46a' : 'rgba(216,230,214,0.35)');
+        ovCtx.strokeRect(x * z + 0.5, y * z + 0.5, w * z, h * z);
+        if (active) {
+          ovCtx.fillStyle = 'rgba(127,196,106,0.12)';
+          ovCtx.fillRect(x * z + 0.5, y * z + 0.5, w * z, h * z);
+        }
+      }
+
+      // ---------- 左侧列表 ----------
+      function renderKeys() {
+        const host = $('keys');
+        host.innerHTML = '';
+        let lastEntry = null;
+
+        for (const k of keys) {
+          if (k.entryKey !== lastEntry) {
+            lastEntry = k.entryKey;
+            const g = document.createElement('div');
+            g.className = 'group';
+            g.textContent = k.entryKey;
+            host.appendChild(g);
+          }
+
+          const done = cuts[k.key] || sheets[k.key];
+          const row = document.createElement('div');
+          row.className = 'k' + (done ? ' done' : '') + (k.key === activeKey ? ' active' : '');
+          row.innerHTML = `<span class="dot"></span><span class="name"></span><span class="size">${k.size[0]}x${k.size[1]}</span>`;
+          row.querySelector('.name').textContent = k.key;
+          if (done) {
+            const img = document.createElement('img');
+            img.className = 'thumb';
+            img.src = thumbUrl(k);
+            row.insertBefore(img, row.querySelector('.name'));
+          }
+          row.addEventListener('click', () => {
+            activeKey = k.key;
+            const c = cuts[k.key];
+            $('outw').value = c && c.out ? c.out[0] : '';
+            $('outh').value = c && c.out ? c.out[1] : '';
+            renderKeys();
+            renderSide();
+            draw();
+          });
+          host.appendChild(row);
+        }
+      }
+
+      // 用一张临时 canvas 把某个 key 的当前切图内容画出来
+      function thumbUrl(k) {
+        const c = cuts[k.key];
+        const s = sheets[k.key];
+        const cnv = document.createElement('canvas');
+        let ctx2;
+        if (c) {
+          const src = sources.get(c.source);
+          if (!src) return '';
+          const [ow, oh] = c.out || [c.rect[2], c.rect[3]];
+          cnv.width = ow; cnv.height = oh;
+          ctx2 = cnv.getContext('2d');
+          ctx2.imageSmoothingEnabled = false;
+          ctx2.drawImage(src.img, c.rect[0], c.rect[1], c.rect[2], c.rect[3], 0, 0, ow, oh);
+        } else if (s) {
+          const src = sources.get(s.source);
+          if (!src || !s.cells.length) return '';
+          const w = s.cells.reduce((a, x) => a + x[2], 0);
+          const h = s.cells[0][3];
+          cnv.width = w; cnv.height = h;
+          ctx2 = cnv.getContext('2d');
+          ctx2.imageSmoothingEnabled = false;
+          let dx = 0;
+          for (const cell of s.cells) {
+            ctx2.drawImage(src.img, cell[0], cell[1], cell[2], cell[3], dx, 0, cell[2], cell[3]);
+            dx += cell[2];
+          }
+        } else return '';
+        return cnv.toDataURL();
+      }
+
+      // ---------- 右侧预览 ----------
+      function renderSide() {
+        const k = activeEntry();
+        const c = cuts[activeKey];
+        const s = sheets[activeKey];
+        const srcId = (c && c.source) || (s && s.source);
+
+        pctx.imageSmoothingEnabled = false;
+        pctx.clearRect(0, 0, preview.width, preview.height);
+
+        const info = [];
+        info.push(`<b>${activeKey}</b>`);
+        info.push(`目标尺寸 ${k.size[0]}x${k.size[1]}`);
+        if (c) {
+          info.push(`图源 ${c.source}`);
+          info.push(`框 [${c.rect.join(', ')}]`);
+          if (c.out) info.push(`输出 ${c.out[0]}x${c.out[1]}`);
+        } else if (s) {
+          info.push(`图源 ${s.source}`);
+          info.push(`已选 ${s.cells.length} 格`);
+        } else {
+          info.push('<span style="color:#e0b23a">还没框</span>');
+        }
+        if (k.packHint) info.push(`<br><span style="color:#7d9480">${k.packHint}</span>`);
+        $('info').innerHTML = info.join('<br>');
+
+        if (srcId && (c || s)) {
+          const url = thumbUrl(k);
+          if (url) {
+            const img = new Image();
+            img.onload = () => {
+              const scale = Math.min(preview.width / img.width, preview.height / img.height);
+              const w = img.width * scale;
+              const h = img.height * scale;
+              pctx.clearRect(0, 0, preview.width, preview.height);
+              pctx.drawImage(img, (preview.width - w) / 2, (preview.height - h) / 2, w, h);
+            };
+            img.src = url;
+          }
+        }
+      }
+
+      // ---------- 导出 ----------
+      $('export').addEventListener('click', () => {
+        const srcMap = {};
+        for (const [id, s] of sources) srcMap[id] = s.path;
+
+        const out = {
+          _note: '由 public/baker.html 生成。改完记得把素材 PNG 放进 public/assets/ 并核对文件名。',
+          version: 1,
+          sources: srcMap,
+          cuts,
+          sheets,
+        };
+
+        const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pack.map.json';
+        a.click();
+
+        const doneCount = Object.keys(cuts).length + Object.keys(sheets).length;
+        status(`已导出 ${doneCount}/${keys.length} 个 key —— 覆盖到 src/data/pack.map.json`);
+      });
+
+      const status = (t) => { $('status').textContent = t; };
+
+      // ---------- 启动 ----------
+      renderKeys();
+      renderSide();
+      draw();
+      status(`已就绪 —— ${keys.length} 个 key 待切。先点左上角「载入图源」。`);
+    </script>
+  </body>
+</html>

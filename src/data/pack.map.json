@@ -1,0 +1,54 @@
+{
+  "_note": "CC0 素材包（Ninja Adventure）的映射表。这是【可以公开】的展示版配置。",
+  "_license": "Ninja Adventure (Pixel-Boy + AAA) — CC0-1.0 公共领域。可商用、可公开、无需署名。",
+  "_source": "https://github.com/pixel-boy/NinjaAdventure",
+  "_status": {
+    "已填": "角色 8 帧、地面 5 格、树、房子、围栏、出货箱、耕地 2 格",
+    "回退": "商店 / 作物 7 张 / 鱼 4 张 / 浮标 没有 CC0 素材，会自动回退成代码生成的占位图（那也是原创的，无版权问题）"
+  },
+  "_sizes_note": "★ 尺寸必须跟着素材包走。CC0 的角色只有 1 格高、房子 5x5 格，和星露谷（2 格高、9x9）差很多。靠缩放素材会糊，只能让几何跟着换。",
+  "version": 1,
+  "sizes": {
+    "player": [16, 16],
+    "tree": [48, 48],
+    "house": [80, 80],
+    "bin": [16, 16],
+    "shop": [48, 32]
+  },
+  "sources": {
+    "village": "cc0/village.png",
+    "floor": "cc0/floor.png",
+    "char": "cc0/character.png",
+    "crate": "cc0/crate.png"
+  },
+  "_player_note": "角色图 64x112 = 4 列 x 7 行，一帧 16x16。列=方向（0下 1上 2左 3右），行=帧。前 4 行是走路。已用肤色重心程序验证过。",
+  "cuts": {
+    "player-down-0": { "source": "char", "rect": [0, 0, 16, 16] },
+    "player-down-1": { "source": "char", "rect": [0, 32, 16, 16] },
+    "player-up-0": { "source": "char", "rect": [16, 0, 16, 16] },
+    "player-up-1": { "source": "char", "rect": [16, 32, 16, 16] },
+    "player-left-0": { "source": "char", "rect": [32, 0, 16, 16] },
+    "player-left-1": { "source": "char", "rect": [32, 32, 16, 16] },
+    "player-right-0": { "source": "char", "rect": [48, 0, 16, 16] },
+    "player-right-1": { "source": "char", "rect": [48, 32, 16, 16] },
+
+    "tree": { "source": "village", "rect": [0, 96, 48, 48] },
+    "house": { "source": "village", "rect": [192, 96, 80, 80] },
+    "fence": { "source": "village", "rect": [128, 16, 16, 16] },
+    "bin": { "source": "crate", "rect": [0, 0, 14, 15], "out": [16, 16] },
+    "soil-tilled": { "source": "floor", "rect": [256, 128, 16, 16] },
+    "soil-watered": { "source": "floor", "rect": [256, 272, 16, 16] }
+  },
+  "sheets": {
+    "tiles": {
+      "source": "floor",
+      "cells": [
+        [176, 192, 16, 16],
+        [32, 192, 16, 16],
+        [256, 272, 16, 16],
+        [32, 352, 16, 16],
+        [80, 256, 16, 16]
+      ]
+    }
+  }
+}

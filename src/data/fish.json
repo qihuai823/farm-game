@@ -1,0 +1,45 @@
+{
+  "_note": "鱼类表。加鱼只改这个文件。改完跑 `npm test` 会自动校验数值合法性。",
+  "_schema": {
+    "id": "唯一英文标识（也是贴图 fish-<id> 的后缀）",
+    "name": "显示名",
+    "color": "占位贴图颜色",
+    "difficulty": "0-100，越高越难钓（决定绿条高度、鱼的游动速度、换向频率）",
+    "sellPrice": "卖出价 (g)",
+    "weight": "出现权重，越大越常见"
+  },
+  "fish": [
+    {
+      "id": "carp",
+      "name": "鲤鱼",
+      "color": "#9aa86a",
+      "difficulty": 18,
+      "sellPrice": 30,
+      "weight": 40
+    },
+    {
+      "id": "bass",
+      "name": "鲈鱼",
+      "color": "#6a8aa8",
+      "difficulty": 42,
+      "sellPrice": 80,
+      "weight": 26
+    },
+    {
+      "id": "catfish",
+      "name": "鲶鱼",
+      "color": "#7a6250",
+      "difficulty": 66,
+      "sellPrice": 160,
+      "weight": 13
+    },
+    {
+      "id": "sturgeon",
+      "name": "鲟鱼",
+      "color": "#4a6a7a",
+      "difficulty": 86,
+      "sellPrice": 320,
+      "weight": 5
+    }
+  ]
+}

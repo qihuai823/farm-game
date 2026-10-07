@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>农场游戏</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #16211a;
+      }
+      #game {
+        width: 100vw;
+        height: 100vh;
+      }
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      /* 启动提示：游戏第一帧渲染出来后会被移除。
+         如果它一直停在这儿，说明 Phaser 根本没起来。 */
+      #boot {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        color: #6f8a6a;
+        font: 14px/1.6 system-ui, "Microsoft YaHei", sans-serif;
+        pointer-events: none;
+        text-align: center;
+      }
+      #boot small {
+        color: #4c6149;
+        font-size: 12px;
+      }
+
+      /* 报错浮层：把黑屏变成可读的错误信息。点一下可以收起。 */
+      #fatal {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        max-height: 60%;
+        overflow: auto;
+        box-sizing: border-box;
+        padding: 14px 18px;
+        background: #3a1414;
+        border-bottom: 1px solid #7a2a2a;
+        color: #ffd7d7;
+        font: 12px/1.6 Consolas, "Courier New", monospace;
+        white-space: pre-wrap;
+        z-index: 999;
+        cursor: pointer;
+      }
+      #fatal b {
+        display: block;
+        margin-bottom: 8px;
+        color: #ff8f8f;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="boot">
+      <span>加载中…</span>
+      <small>如果一直停在这里：先把窗口拉大一点，或者刷新页面</small>
+    </div>
+    <div id="fatal" title="点击收起"></div>
+
+    <script>
+      (function () {
+        var box = document.getElementById('fatal');
+        function show(title, detail) {
+          if (!box) return;
+          box.style.display = 'block';
+          box.innerHTML = '';
+          var b = document.createElement('b');
+          b.textContent = title;
+          var pre = document.createElement('span');
+          pre.textContent = detail;
+          box.appendChild(b);
+          box.appendChild(pre);
+        }
+        box.addEventListener('click', function () {
+          box.style.display = 'none';
+        });
+
+        // 给外部（main.js）用：WebGL 上下文丢失这类不是 JS 异常的错误也能显示出来
+        window.__showFatal = show;
+
+        window.addEventListener('error', function (e) {
+          var parts = [e.message || '未知错误'];
+          if (e.filename) parts.push(e.filename + ':' + e.lineno + ':' + e.colno);
+          if (e.error && e.error.stack) parts.push('', e.error.stack);
+          show('运行出错（截图或复制这段给我）', parts.join('\n'));
+        });
+
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          show('未处理的 Promise 异常', String((r && r.stack) || r));
+        });
+      })();
+    </script>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+{
+  "_note": "贴图契约 —— 换素材时对着这份清单准备文件。scripts/check-assets.mjs 会自动校验【代码生成的贴图】和这份契约是否一致，防止两边跑偏。",
+  "_anchor": "物件类贴图锚点在【底部中心】（origin 0.5, 1）—— 因为深度排序按脚底 y。地面图块锚点在左上角。",
+  "_tile": 16,
+  "_howToSwap": [
+    "1. 把素材包解压到 public/assets/",
+    "2. 按这份清单切图 / 改名 / 缩放，产出同名同尺寸的 PNG",
+    "3. 把 src/textures.js 的 buildTextures() 换成 preload() 里 load.image（阶段 2 待做，代码结构已就位）",
+    "4. 跑 npm test，check-assets 会告诉你代码和这份契约有没有跑偏"
+  ],
+  "entries": [
+    {
+      "key": "tiles",
+      "kind": "tileset",
+      "size": [80, 16],
+      "tiles": 5,
+      "desc": "地面图集，一行 5 格横向排开：0=草地 / 1=草地(深) / 2=泥土 / 3=水 / 4=碎石",
+      "packHint": "地形图集（terrain tileset）。星露谷对应 spring_outdoorsTileSheet 一类的户外地块图"
+    },
+    { "key": "tree", "size": [32, 96], "desc": "树 2x6 格，树干在底部（碰撞盒只占底部 12x12）", "packHint": "星露谷原生尺寸就是 32x96，直拷。树冠可以走过去，只有树干挡路" },
+    { "key": "fence", "size": [16, 16], "desc": "围栏一段", "packHint": "木栅栏，能无缝拼接" },
+    { "key": "house", "size": [144, 144], "desc": "农舍 9x9 格，门在底部中央", "packHint": "★ 星露谷 houses.png 里每个农舍变体是 145x144，取 [15,0,144,144] 那一块" },
+    { "key": "bin", "size": [32, 32], "desc": "出货箱 2x2 格", "packHint": "星露谷原生就是 32x32，直拷" },
+    { "key": "shop", "size": [48, 32], "desc": "种子商店摊位 3x2 格，柜台在底部", "packHint": "带遮阳篷的摊位/小店" },
+    { "key": "soil-tilled", "size": [16, 16], "desc": "锄过的土（没浇水）", "packHint": "翻耕过的土壤" },
+    { "key": "soil-watered", "size": [16, 16], "desc": "浇过水的土（颜色更深）", "packHint": "湿润土壤" },
+    { "key": "crop-0", "size": [16, 16], "desc": "作物幼苗 第 1 阶段（最小）" },
+    { "key": "crop-1", "size": [16, 16], "desc": "作物幼苗 第 2 阶段" },
+    { "key": "crop-2", "size": [16, 16], "desc": "作物幼苗 第 3 阶段" },
+    { "key": "crop-3", "size": [16, 16], "desc": "作物幼苗 第 4 阶段（快成熟）" },
+    {
+      "key": "crop-mature-{crop}",
+      "size": [16, 16],
+      "from": "crops",
+      "desc": "每种作物的成熟形态，{crop} 取 crops.json 里的 id",
+      "packHint": "每种作物一张成熟图。作物越多越费事 —— 这是换素材里最重的一块"
+    },
+    {
+      "key": "player-{dir}-{frame}",
+      "size": [16, 32],
+      "dirs": ["down", "up", "left", "right"],
+      "frames": [0, 1],
+      "desc": "角色 4 朝向 x 2 帧（走路）。锚点在底部中心",
+      "packHint": "★ 最关键的一项。尺寸和星露谷的角色帧一致，可以原样直拷。行序：0=下 1=右 2=上 3=左；列序：0=站立 1=迈步"
+    },
+    {
+      "key": "fish-{fish}",
+      "size": [16, 16],
+      "from": "fish",
+      "desc": "鱼的图标，{fish} 取 fish.json 里的 id",
+      "packHint": "物品图标，不需要动画"
+    },
+    { "key": "bobber", "size": [8, 8], "desc": "钓竿浮标" }
+  ]
+}

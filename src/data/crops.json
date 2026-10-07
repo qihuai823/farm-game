@@ -1,0 +1,45 @@
+{
+  "_note": "内容表。加作物、调价格只改这个文件，不用碰代码。改完跑 `npm test` 会自动校验数值合法性。",
+  "_schema": {
+    "id": "唯一英文标识（也是贴图 crop-mature-<id> 的后缀）",
+    "name": "显示名",
+    "color": "成熟果实的颜色（占位贴图用）",
+    "seedCost": "种子买入价 (g)",
+    "sellPrice": "作物卖出价 (g)",
+    "growthDays": "从播种到成熟、需要浇水的天数",
+    "regrowDays": "收获后几天再结果；0 = 一次性作物",
+    "stages": "生长阶段数（占位贴图固定 5 档：0-3 幼苗 + 成熟）"
+  },
+  "crops": [
+    {
+      "id": "parsnip",
+      "name": "防风草",
+      "color": "#e8d9a0",
+      "seedCost": 20,
+      "sellPrice": 35,
+      "growthDays": 4,
+      "regrowDays": 0,
+      "stages": 5
+    },
+    {
+      "id": "potato",
+      "name": "土豆",
+      "color": "#c9a06a",
+      "seedCost": 50,
+      "sellPrice": 80,
+      "growthDays": 6,
+      "regrowDays": 0,
+      "stages": 5
+    },
+    {
+      "id": "strawberry",
+      "name": "草莓",
+      "color": "#e2555a",
+      "seedCost": 100,
+      "sellPrice": 120,
+      "growthDays": 8,
+      "regrowDays": 4,
+      "stages": 5
+    }
+  ]
+}

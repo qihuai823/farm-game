@@ -1,0 +1,22 @@
+# 依赖和构建产物
+node_modules/
+dist/
+dist-showcase/
+
+# ★ 星露谷素材 —— 受版权保护，只能本地自用
+#   它们被刻意放在 public/ 之外，所以干净版构建根本不会带上它们。
+#   想重新解出：npm run assets:extract
+personal/
+
+# 个人版开关 —— 开启后会加载 personal/ 里的素材，所以这个文件本身也别提交
+.env.personal
+.env.*.local
+
+# 由 check-assets.mjs 自动生成，可以随时重建
+public/pack.keys.json
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

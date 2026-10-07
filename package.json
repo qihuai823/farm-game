@@ -1,0 +1,36 @@
+{
+  "name": "farm-game",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "星露谷式网页农场游戏：种植 / 商店 / 背包 / 钓鱼小游戏。Phaser 3 + Vite，素材包可换。",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:showcase": "vite build",
+    "build:personal": "vite build --mode personal",
+    "preview": "vite preview",
+    "dev:personal": "vite --mode personal",
+
+    "test": "node scripts/test-all.mjs",
+    "test:imports": "node scripts/check-imports.mjs",
+    "test:html": "node scripts/check-html.mjs",
+    "test:assets": "node scripts/check-assets.mjs",
+    "test:logic": "node scripts/logic-test.mjs",
+
+    "check:copyright": "node scripts/check-copyright.mjs",
+
+    "assets:extract": "node scripts/extract-assets.mjs",
+    "assets:cc0": "node scripts/get-cc0-assets.mjs",
+
+    "pack:cc0": "node scripts/switch-pack.mjs cc0",
+    "pack:stardew": "node scripts/switch-pack.mjs stardew"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0",
+    "xnb": "^1.3.0-a"
+  }
+}
